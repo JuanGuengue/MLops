@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 
 import joblib
@@ -48,18 +49,18 @@ def score_batch_file(input_path: Path) -> dict:
     }
 
     # MLflow aqui registra la corrida operativa del scoring, no un experimento de entrenamiento.
-    mlflow.set_tracking_uri(f"file:{MLRUNS_DIR}")
+    mlflow.set_tracking_uri(os.environ.get("MLFLOW_TRACKING_URI", f"file:{MLRUNS_DIR}"))
     mlflow.set_experiment("customer-batch-scoring")
     with mlflow.start_run(run_name="daily_batch_scoring"):
         mlflow.log_param("input_file", str(input_path))
         mlflow.log_metric("rows_scored", summary["rows_scored"])
         mlflow.log_metric("high_risk_customers", summary["high_risk_customers"])
         mlflow.log_metric("average_risk_probability", summary["average_risk_probability"])
-        mlflow.log_artifact(str(SCORED_BATCH_PATH))
+        # mlflow.log_artifact(str(SCORED_BATCH_PATH)) error al intentar subir el CSV, asi que lo guardamos manualmente y luego subimos el JSON con el resumen.
 
         summary_path = OUTPUT_DIR / "scoring_summary.json"
         summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
-        mlflow.log_artifact(str(summary_path))
+        #mlflow.log_artifact(str(summary_path)) error al intentar subir el JSON, asi que lo dejamos en el output local.
 
     return summary
 
