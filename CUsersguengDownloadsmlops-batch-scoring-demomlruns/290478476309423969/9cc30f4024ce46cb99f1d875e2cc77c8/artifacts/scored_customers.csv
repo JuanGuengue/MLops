@@ -1,0 +1,6 @@
+customer_id,monthly_charges,support_tickets,late_payments,tenure_months,risk_probability,risk_prediction,risk_label
+B001,78.5,1,0,22,0.0001,0,bajo
+B002,130.0,6,3,5,1.0,1,alto
+B003,92.4,2,1,16,0.5215,1,medio
+B004,48.9,0,0,40,0.0,0,bajo
+B005,105.2,4,2,10,0.9998,1,alto

@@ -1,0 +1,44 @@
+services:
+  mlflow:
+    image: python:3.12-slim
+    container_name: batch-mlflow-server
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command: >
+      sh -c "pip install --no-cache-dir mlflow==2.16.2 &&
+      mlflow server --host 0.0.0.0 --port 5000"
+    ports:
+      - "5001:5000"
+
+  api:
+    build: .
+    container_name: batch-scoring-api
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:500
+    volumes:
+      - ./:/app
+    command: >
+      sh -c "python scripts/bootstrap_approved_model.py &&
+      uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload"
+    ports:
+      - "8001:8000"
+    depends_on:
+      - mlflow
+
+  airflow:
+    image: apache/airflow:2.10.2
+    container_name: batch-airflow
+    environment:
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - PROJECT_ROOT=/opt/airflow/project
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./:/opt/airflow/project
+    command: >
+      bash -c "pip install --no-cache-dir -r /opt/airflow/project/requirements.txt &&
+      airflow standalone"
+    ports:
+      - "8081:8080"
+

@@ -1,0 +1,6 @@
+{
+  "rows_scored": 5,
+  "high_risk_customers": 2,
+  "average_risk_probability": 0.50428,
+  "output_file": "/app/data/output/scored_customers.csv"
+}
